@@ -4,7 +4,12 @@ language: generic
 cache:
   directories:
     - $HOME/.ccache
-script: bash -ex ./.travis-install.sh && bash -ex ./.travis-script.sh
+script: |
+  if [ $TRAVIS_ARCH = "aarch64" ] && [ $PACKAGE = "python3" ] ; then
+      bash -ex ./.travis-install.sh && bash -ex ./.travis-script.sh
+  else
+      travis_wait 30 bash -ex ./.travis-install.sh && travis_wait 60 bash -ex ./.travis-script.sh
+  fi
 
 os:
   - osx
@@ -61,10 +66,13 @@ jobs:
     - stage: deploy
       script:
         - bash -ex ./.travis-deploy-docker.sh
-        - bash -ex ./.travis-trigger.sh ukontainer/runu
+        - bash -ex ./.travis-trigger.sh ukontainer/runu tinyconfig #XXX: revert
       os: linux
       dist: trusty  # XXX: docker multi-arch image requires 17.09(dockerd):18.06(docker)
       env: RUMPKERNEL=linux
+
+after_failure:
+  - cat $HOME/*.log
 
 env:
   global:

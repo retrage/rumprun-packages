@@ -10,6 +10,7 @@ if [ $TRAVIS_ARCH == "aarch64" ] ; then
     sudo apt-get install libc6:armhf crossbuild-essential-armhf
 fi
 fi
+
 # XXX: take too long..
 #sudo apt-get install openjdk-7-jdk
 
@@ -43,3 +44,8 @@ curl -L https://dl.bintray.com/ukontainer/ukontainer/$TRAVIS_OS_NAME/$ARCH/frank
      -o /tmp/frankenlibc.tar.gz
 sudo mkdir -p /opt/rump && sudo chown $USER /opt/rump
 tar xfz /tmp/frankenlibc.tar.gz -C /
+
+curl -L https://dl.bintray.com/ukontainer/ukontainer/$TRAVIS_OS_NAME/$ARCH/frankenlibc-tiny.tar.gz \
+     -o /tmp/frankenlibc-tiny.tar.gz
+sudo mkdir -p /opt/rump-tiny && sudo chown $USER /opt/rump-tiny
+tar xfz /tmp/frankenlibc-tiny.tar.gz -C /

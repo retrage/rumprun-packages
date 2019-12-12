@@ -58,12 +58,13 @@ git clone -q https://github.com/thehajime/runu-base.git
        local OS=$1
        local ARCH=$2
        local NAME=$3
+       local SLIM=$4
 
        cd runu-base
        mkdir -p bin imgs sbin
 
        curl -L -u $BINTRAY_USER:$BINTRAY_APIKEY \
-	    https://dl.bintray.com/ukontainer/ukontainer/$OS/$ARCH/$NAME -o bin/$NAME
+	    https://dl.bintray.com/ukontainer/ukontainer/$OS/$ARCH/$NAME$SLIM -o bin/$NAME
 
        if [ "$NAME" = "python" ] ; then
 	   curl -L -u $BINTRAY_USER:$BINTRAY_APIKEY \
@@ -73,7 +74,7 @@ git clone -q https://github.com/thehajime/runu-base.git
 		https://dl.bintray.com/ukontainer/ukontainer/$OS/$ARCH/data.iso -o imgs/data.iso
        elif [ "$NAME" = "netperf" ] ; then
 	   curl -L -u $BINTRAY_USER:$BINTRAY_APIKEY \
-		https://dl.bintray.com/ukontainer/ukontainer/$OS/$ARCH/netserver -o bin/netserver
+		https://dl.bintray.com/ukontainer/ukontainer/$OS/$ARCH/netserver$SLIM -o bin/netserver
        fi
 
        chmod +x bin/*
@@ -81,9 +82,15 @@ git clone -q https://github.com/thehajime/runu-base.git
        ls -lR .
        # push an image to docker hub
        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-       docker build -t $DOCKER_USERNAME/runu-$NAME:$VERSION-$OS-$ARCH .
+
+       # strip binaries
+       if [ -n "$SLIM" ] ; then
+           strip bin/* || true
+       fi
+
+       docker build -t $DOCKER_USERNAME/runu-$NAME$SLIM:$VERSION-$OS-$ARCH .
        docker images
-       docker push $DOCKER_USERNAME/runu-$NAME:$VERSION-$OS-$ARCH
+       docker push $DOCKER_USERNAME/runu-$NAME$SLIM:$VERSION-$OS-$ARCH
 
        cd ..
        rm -rf runu-base
@@ -125,7 +132,7 @@ chmod +x /tmp/docker/docker
 
 # create images
 OS_ARCH_MTX=("linux amd64" "linux arm" "osx amd64")
-PKGS="node python netperf nginx sqlite_bench"
+PKGS="node python netperf nginx sqlite-bench"
 
 for i in "${OS_ARCH_MTX[@]}"
 do
@@ -140,6 +147,7 @@ do
     for pkg in $PKGS
     do
 	deploy_slim ${os_arch[@]} $pkg
+	deploy_slim ${os_arch[@]} $pkg "-slim"
     done
 done
 
@@ -152,4 +160,5 @@ create_multi_arch_image runu-base
 for pkg in $PKGS
 do
     create_multi_arch_image runu-$pkg
+    create_multi_arch_image runu-$pkg-slim
 done

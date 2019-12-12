@@ -106,7 +106,7 @@ images/python.img: build/python$(EXESUFFIX)
 
 .PHONY: clean
 clean:
-	-$(MAKE) -C build clean
+	rm -f build/python$(EXESUFFIX)
 	rm -f bin/*
 	rm -f images/python.iso
 	rm -f images/python.img
