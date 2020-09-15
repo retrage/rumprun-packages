@@ -44,7 +44,7 @@ $(NODE_OUT): $(BUILD_DIR)/node.gyp $(BUILD_DIR)/config.mk _third_party_main.js r
 	cp $(NODE_OUT) bin/
 
 $(BUILD_DIR)/config.mk: $(BUILD_DIR)/stamp_patch
-	(cd $(BUILD_DIR); ./configure --without-snapshot --dest-cpu=$(CPU) --link-module=../_third_party_main.js --link-module=../rumpmain.js --openssl-no-asm --without-dtrace)
+	(cd $(BUILD_DIR); ./configure --partly-static --without-snapshot --dest-cpu=$(CPU) --link-module=../_third_party_main.js --link-module=../rumpmain.js --openssl-no-asm --without-dtrace)
 
 $(BUILD_DIR)/stamp_patch: $(BUILD_DIR)/configure patches/*.patch
 	(cd $(BUILD_DIR) && ../../scripts/apply-patches.sh -p 0 ./ ../patches/0*.patch)
